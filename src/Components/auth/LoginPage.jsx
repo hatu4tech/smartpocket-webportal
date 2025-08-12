@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { 
-  Shield, School, User, Mail, Lock, Eye, EyeOff, AlertCircle 
+  Mail, Lock, Eye, EyeOff, AlertCircle 
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    role: 'school',
-    school_code: ''
+    password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,15 +24,6 @@ export const LoginPage = () => {
     if (error) setError('');
   };
 
-  const handleRoleChange = (role) => {
-    setFormData(prev => ({
-      ...prev,
-      role,
-      school_code: role === 'admin' ? '' : prev.school_code
-    }));
-    if (error) setError('');
-  };
-
   const validateForm = () => {
     if (!formData.email || !formData.password) {
       setError('Email and password are required');
@@ -46,15 +35,10 @@ export const LoginPage = () => {
       return false;
     }
     
-    if (formData.role === 'school' && !formData.school_code) {
-      setError('School code is required for school administrators');
-      return false;
-    }
-    
     return true;
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     
@@ -71,51 +55,21 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="mb-6">
+            <img 
+              src="/logo-portal.png" 
+              alt="Logo" 
+              className="mx-auto max-w-full h-auto max-h-16 sm:max-h-20 object-contain" 
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Smart Pocket</h1>
           <p className="text-gray-600">Administrator Login Portal</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Login as
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('admin')}
-                  className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                    formData.role === 'admin'
-                      ? 'border-green-500 bg-green-50 text-green-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                  }`}
-                >
-                  <User className="w-5 h-5 mx-auto mb-1" />
-                  <div className="text-sm font-medium">Super Admin</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('school')}
-                  className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                    formData.role === 'school'
-                      ? 'border-green-500 bg-green-50 text-green-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                  }`}
-                >
-                  <School className="w-5 h-5 mx-auto mb-1" />
-                  <div className="text-sm font-medium">School Admin</div>
-                </button>
-              </div>
-            </div>
-
+          <div className="space-y-6">
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -129,34 +83,12 @@ export const LoginPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 text-green-700 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 text-blue-700 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
                   placeholder="Enter your email"
                   required
                 />
               </div>
             </div>
-
-            {/* School Code Field */}
-            {formData.role === 'school' && (
-              <div>
-                <label htmlFor="school_code" className="block text-sm font-medium text-gray-700 mb-2">
-                  School Code
-                </label>
-                <div className="relative">
-                  <School className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    id="school_code"
-                    name="school_code"
-                    value={formData.school_code}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2  text-green-700 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
-                    placeholder="Enter school code"
-                    required
-                  />
-                </div>
-              </div>
-            )}
 
             {/* Password Field */}
             <div>
@@ -171,7 +103,7 @@ export const LoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2  text-green-700 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 text-blue-700 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
                   placeholder="Enter your password"
                   required
                 />
@@ -197,7 +129,8 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 outline-none"
+              onClick={handleSubmit}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-blue-300 disabled:to-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none shadow-lg hover:shadow-xl"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -208,7 +141,7 @@ export const LoginPage = () => {
                 'Sign In'
               )}
             </button>
-          </form>
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
@@ -226,4 +159,5 @@ export const LoginPage = () => {
     </div>
   );
 };
+
 export default LoginPage;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Download, AlertCircle} from 'lucide-react';
 import { DashboardLayout } from '../layout/DashboardLayout';
-import { DashboardOverview } from '../AdminViews/DashboardOverview';
-import { SchoolsManagement } from '../AdminViews/SchoolsManagement';
+import DashboardOverview from '/src/Components//AdminViews/DashboardOverview.jsx';
+import SchoolsManagement from '/src/Components/AdminViews/SchoolsManagement.jsx';
 import { AnalyticsView } from '../AdminViews/AnalyticsView';
 import { PlaceholderView } from '../AdminViews/PlaceholderView';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,7 +22,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -38,15 +38,11 @@ const AdminDashboard = () => {
       case 'schools':
         return <SchoolsManagement />;
       case 'analytics':
-        return <AnalyticsView />;
-      case 'students':
-        return <StudentsManagement />;
-      case 'parents':
-        return <ParentsManagement />;
+        return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'links':
         return <LinksManagement />;
       case 'transactions':
-        return < TransactionsManagement />;
+        return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'reports':
         return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'settings':
@@ -77,7 +73,7 @@ const AdminDashboard = () => {
     }
     
     return (
-      <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
         <Download className="w-4 h-4" />
         Export Data
       </button>

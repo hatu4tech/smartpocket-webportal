@@ -33,7 +33,7 @@ const App = () => {
 
   switch (user.role) {
     case 'admin':
-      return <SchoolsManagement />;
+      return <AdminDashboard />;
     case 'school':
       return <SchoolDashboard />;
     default:
