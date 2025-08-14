@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from './hooks/useAuth';
 import AdminDashboard from './Components/dashboard/AdminDashboard.jsx';
-import SchoolsManagement from './Components/dashboard/demo.jsx';
 import { DashboardLayout } from './Components/layout/DashboardLayout.jsx';
 import SchoolDashboard from './Components/dashboard/SchoolDashboard';
 import LoginPage from './Components/auth/LoginPage';
