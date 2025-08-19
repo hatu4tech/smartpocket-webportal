@@ -421,47 +421,79 @@ const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
   );
 };
 
-// Fixed Student Form Component - matches backend structure
+
 const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
+  
+  /**
+   * Helper function to format an ISO 8601 timestamp for use in a date input field.
+   * HTML date inputs require 'YYYY-MM-DD' format, so we strip out time and timezone.
+   *
+   * @param {string} isoString - ISO 8601 date string from backend
+   * @returns {string} formatted date string compatible with <input type="date" />
+   */
+  const formatDateForInput = (isoString) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Initialize local state for form fields.
+  // Prefills from `student` if provided (edit mode) or empty for create mode.
   const [formData, setFormData] = useState({
     firstName: student?.firstName || student?.first_name || '',
     lastName: student?.lastName || student?.last_name || '',
     email: student?.email || '', 
     grade: student?.grade || '',
     studentId: student?.studentId || student?.student_id || '',
-    dateOfBirth: student?.dateOfBirth || student?.date_of_birth || '',
+    dateOfBirth: formatDateForInput(student?.dateOfBirth || student?.date_of_birth),
     phone: student?.phone || '',
-    // Handle the name field from backend response  
     displayName: student?.displayName || student?.name || ''
   });
 
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Transform data to match what backend expects
+
     const submitData = {
       firstName: formData.firstName,
       lastName: formData.lastName,
-      email: formData.email || undefined, // Only send email if provided
+      email: formData.email || `${formData.firstName.toLowerCase()}.${formData.lastName.toLowerCase()}@temp.com`,
       phone: formData.phone || undefined,
       displayName: formData.displayName || `${formData.firstName} ${formData.lastName}`.trim(),
-      role: 'student' // Ensure role is set for new students
+      role: 'student' 
     };
-    
-    // Add student-specific fields if they exist
+
+    // Include student-specific fields only if user has entered them
     if (formData.grade) submitData.grade = formData.grade;
     if (formData.studentId) submitData.studentId = formData.studentId;
-    if (formData.dateOfBirth) submitData.dateOfBirth = formData.dateOfBirth;
-    
+    if (formData.dateOfBirth) {
+       submitData.dateOfBirth = new Date(formData.dateOfBirth).toISOString();
+    }
+    // Trigger parent-provided callback to handle API submission
     onSubmit(submitData);
   };
 
+  /**
+   * Updates local form state when an input field changes.
+   * Generic handler that updates any field in formData by key.
+   *
+   * @param {string} field - name of the form field to update
+   * @param {string} value - new value for the field
+   */
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Render form
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Grid layout: 2-column on medium screens, single column on small */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* First Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
           <input
@@ -472,6 +504,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             required
           />
         </div>
+
+        {/* Last Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
           <input
@@ -482,6 +516,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             required
           />
         </div>
+
+        {/* Student ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
           <input
@@ -491,6 +527,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
+
+        {/* Grade */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Grade</label>
           <input
@@ -500,6 +538,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
+
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
           <input
@@ -509,6 +549,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
+
+        {/* Phone */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
           <input
@@ -518,6 +560,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
+
+        {/* Date of Birth */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
           <input
@@ -527,6 +571,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
+
+        {/* Display Name */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
           <input
@@ -538,7 +584,8 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
       </div>
-      
+
+      {/* Form action buttons */}
       <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
         <button
           type="button"
@@ -826,17 +873,17 @@ const SchoolsManagement = () => {
       setModalLoading(true);
       
       if (editingItem) {
-        // For updates, we need to update the student and maintain parent relationship
         await apiService.updateSchoolStudent(selectedSchool.id, editingItem.id, studentData);
       } else {
-        // For creation, create student and link to parent
-        const createData = {
-          ...studentData,
-          schoolId: selectedSchool.id,
-          parentId: selectedParent.id // Link to current parent
-        };
-        await apiService.addStudentToParent(selectedSchool.id, selectedParent.id, createData);
-      }
+      // For creation, call the student creation endpoint
+      const createData = {
+        ...studentData,
+        parentId: selectedParent.id, // optional, will link automatically
+      };
+      console.log('Creating student with payload:', createData);
+
+      await apiService.createSchoolStudent(selectedSchool.id, createData);
+    }
       
       setShowStudentModal(false);
       setEditingItem(null);
