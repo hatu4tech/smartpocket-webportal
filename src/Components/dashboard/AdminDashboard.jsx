@@ -9,7 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { LoginPage } from '../auth/LoginPage';
 import { StudentsManagement } from '../AdminViews/StudentsManagement';
 import { ParentsManagement } from '../AdminViews/ParentsManagement';
-import { LinksManagement } from '../AdminViews/LinksManagement';
+import LinkManagement from '../AdminViews/LinksManagement.jsx';
 import { TransactionsManagement } from '../AdminViews/TransactionsManagement';
 
 
@@ -40,7 +40,7 @@ const AdminDashboard = () => {
       case 'analytics':
         return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'links':
-        return <LinksManagement />;
+        return <LinkManagement />;
       case 'transactions':
         return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'reports':

@@ -11,7 +11,6 @@ import { useAuth } from '../../hooks/useAuth';
 const DashboardLayout = ({ children, title, actions, activeTab, onTabChange }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
-  console.log('DashboardLayout user:', user);
 
   // Define navigation items based on user role
   const sidebarItems = useMemo(() => {

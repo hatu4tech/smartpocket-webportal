@@ -6,7 +6,8 @@ import { LoginPage } from '../auth/LoginPage';
 import { ParentsManagement } from '../AdminViews/ParentsManagement';
 import DashboardOverview from '/src/Components//AdminViews/DashboardOverview.jsx';
 import { PlaceholderView } from '../AdminViews/PlaceholderView';
-import { LinksManagement } from '../AdminViews/LinksManagement';
+import LinkManagement from '../AdminViews/LinksManagement.jsx';
+
 
 // School Dashboard
 const SchoolDashboard = () => {
@@ -34,7 +35,7 @@ const SchoolDashboard = () => {
       case 'analytics':
         return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'links':
-        return <LinksManagement />;
+        return <LinkManagement />;
       case 'transactions':
         return <PlaceholderView title="Reports & Documents" description="Generate and export comprehensive reports for schools and administration." />;
       case 'reports':

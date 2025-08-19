@@ -128,5 +128,70 @@ export const apiService = {
 
   async getSchoolDashboard(schoolId) {
     return this.request(`/schools/${schoolId}/dashboard`);
+  },
+
+
+//=================== Parent-Student Relationship Management
+
+  // Get all students linked to a parent
+  async getParentStudents(parentId) {
+    return this.request(`/parents/${parentId}/students`);
+  },
+
+  // Get specific parent-student relationship
+  async getParentStudent(parentId, studentId) {
+    return this.request(`/parents/${parentId}/students/${studentId}`);
+  },
+
+  // Link a student to a parent
+  async addStudentToParent(schoolId, parentId, studentData) {
+    return this.request(`/schools/${schoolId}/parents/${parentId}/students`, {
+      method: 'POST',
+      body: JSON.stringify(studentData),
+    });
+  },
+
+  // Unlink a student from a parent
+  async removeStudentFromParent(parentId, studentId) {
+    return this.request(`/parents/${parentId}/students/${studentId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Parent management for UI
+  async getAllParents(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    return this.request(`/parents${queryParams ? '?' + queryParams : ''}`);
+  },
+
+  async getParent(parentId) {
+    return this.request(`/parents/${parentId}`);
+  },
+
+  async searchParents(query) {
+    return this.request(`/parents/search?q=${encodeURIComponent(query)}`);
+  },
+
+  async filterParents(filters) {
+    const queryParams = new URLSearchParams(filters).toString();
+    return this.request(`/parents/filter?${queryParams}`);
+  },
+
+  async getParentInSchool(schoolId, parentId) {
+    return this.request(`/school/${schoolId}/parents/${parentId}`);
+  },
+  
+  // Link student to parent (wrapper for better naming)
+  async linkStudentToParent(parentId, studentId, relationshipData = {}) {
+    return this.addStudentToParent(parentId, { 
+      student_id: studentId, 
+      ...relationshipData 
+    });
+  },
+
+  // Unlink student from parent (wrapper for better naming)
+  async unlinkStudentFromParent(parentId, studentId) {
+    return this.removeStudentFromParent(parentId, studentId);
   }
+
 };

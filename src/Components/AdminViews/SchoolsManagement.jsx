@@ -318,20 +318,29 @@ const SchoolForm = ({ school, onSubmit, onCancel, isLoading }) => {
   );
 };
 
-// Parent Form Component
+// Fixed Parent Form Component - matches backend User model
 const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
   const [formData, setFormData] = useState({
-    name: parent?.name || '',
+    firstName: parent?.firstName || parent?.first_name || '',
+    lastName: parent?.lastName || parent?.last_name || '',
     email: parent?.email || '',
     phone: parent?.phone || '',
-    address: parent?.address || '',
-    occupation: parent?.occupation || '',
-    emergency_contact: parent?.emergency_contact || ''
+    // Handle the name field from backend response
+    displayName: parent?.displayName || parent?.name || ''
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    // Transform data to match what backend expects
+    const submitData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      displayName: formData.displayName || `${formData.firstName} ${formData.lastName}`.trim(),
+      role: 'parent' // Ensure role is set for new parents
+    };
+    onSubmit(submitData);
   };
 
   const handleChange = (field, value) => {
@@ -342,11 +351,21 @@ const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
           <input
             type="text"
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            value={formData.firstName}
+            onChange={(e) => handleChange('firstName', e.target.value)}
+            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+          <input
+            type="text"
+            value={formData.lastName}
+            onChange={(e) => handleChange('lastName', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             required
           />
@@ -362,40 +381,22 @@ const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Occupation</label>
-          <input
-            type="text"
-            value={formData.occupation}
-            onChange={(e) => handleChange('occupation', e.target.value)}
-            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
           <input
             type="text"
-            value={formData.address}
-            onChange={(e) => handleChange('address', e.target.value)}
+            value={formData.displayName}
+            onChange={(e) => handleChange('displayName', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Emergency Contact</label>
-          <input
-            type="text"
-            value={formData.emergency_contact}
-            onChange={(e) => handleChange('emergency_contact', e.target.value)}
-            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            placeholder="Will auto-generate from first and last name if empty"
           />
         </div>
       </div>
@@ -420,22 +421,38 @@ const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
   );
 };
 
-// Student Form Component
+// Fixed Student Form Component - matches backend structure
 const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
   const [formData, setFormData] = useState({
-    name: student?.name || '',
+    firstName: student?.firstName || student?.first_name || '',
+    lastName: student?.lastName || student?.last_name || '',
+    email: student?.email || '', 
     grade: student?.grade || '',
-    age: student?.age || '',
-    date_of_birth: student?.date_of_birth || '',
-    gender: student?.gender || '',
-    student_id: student?.student_id || '',
-    enrollment_date: student?.enrollment_date || '',
-    medical_info: student?.medical_info || ''
+    studentId: student?.studentId || student?.student_id || '',
+    dateOfBirth: student?.dateOfBirth || student?.date_of_birth || '',
+    phone: student?.phone || '',
+    // Handle the name field from backend response  
+    displayName: student?.displayName || student?.name || ''
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    // Transform data to match what backend expects
+    const submitData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email || undefined, // Only send email if provided
+      phone: formData.phone || undefined,
+      displayName: formData.displayName || `${formData.firstName} ${formData.lastName}`.trim(),
+      role: 'student' // Ensure role is set for new students
+    };
+    
+    // Add student-specific fields if they exist
+    if (formData.grade) submitData.grade = formData.grade;
+    if (formData.studentId) submitData.studentId = formData.studentId;
+    if (formData.dateOfBirth) submitData.dateOfBirth = formData.dateOfBirth;
+    
+    onSubmit(submitData);
   };
 
   const handleChange = (field, value) => {
@@ -446,11 +463,21 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
           <input
             type="text"
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            value={formData.firstName}
+            onChange={(e) => handleChange('firstName', e.target.value)}
+            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+          <input
+            type="text"
+            value={formData.lastName}
+            onChange={(e) => handleChange('lastName', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             required
           />
@@ -459,69 +486,55 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
           <input
             type="text"
-            value={formData.student_id}
-            onChange={(e) => handleChange('student_id', e.target.value)}
+            value={formData.studentId}
+            onChange={(e) => handleChange('studentId', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Grade *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Grade</label>
           <input
             type="text"
             value={formData.grade}
             onChange={(e) => handleChange('grade', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-            required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
           <input
-            type="number"
-            value={formData.age}
-            onChange={(e) => handleChange('age', e.target.value)}
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+          <input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => handleChange('phone', e.target.value)}
+            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+          />
+        </div>
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
           <input
             type="date"
-            value={formData.date_of_birth}
-            onChange={(e) => handleChange('date_of_birth', e.target.value)}
+            value={formData.dateOfBirth}
+            onChange={(e) => handleChange('dateOfBirth', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-          <select
-            value={formData.gender}
-            onChange={(e) => handleChange('gender', e.target.value)}
-            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Enrollment Date</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
           <input
-            type="date"
-            value={formData.enrollment_date}
-            onChange={(e) => handleChange('enrollment_date', e.target.value)}
+            type="text"
+            value={formData.displayName}
+            onChange={(e) => handleChange('displayName', e.target.value)}
             className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Medical Information</label>
-          <textarea
-            value={formData.medical_info}
-            onChange={(e) => handleChange('medical_info', e.target.value)}
-            rows="4"
-            className="w-full px-4 py-3 border text-gray-600 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-            placeholder="Any medical conditions, allergies, or special needs..."
+            placeholder="Will auto-generate from first and last name if empty"
           />
         </div>
       </div>
@@ -569,8 +582,9 @@ const SchoolsManagement = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Store school stats to fix the parent count issue
+  // Store comprehensive stats for schools and parents
   const [schoolStats, setSchoolStats] = useState({});
+  const [parentStats, setParentStats] = useState({});
   
   const { user } = useAuth();
   
@@ -586,11 +600,11 @@ const SchoolsManagement = () => {
     loadSchools();
   }, []);
 
-   if (!user) {
-      return <LoginPage />;
-    }
+  if (!user) {
+    return <LoginPage />;
+  }
 
-  // Load school stats when schools are loaded
+  // Load comprehensive school stats (both parents and students)
   useEffect(() => {
     const loadSchoolStats = async () => {
       if (schools.length > 0) {
@@ -598,12 +612,25 @@ const SchoolsManagement = () => {
         await Promise.all(
           schools.map(async (school) => {
             try {
-              const parentData = await apiService.getSchoolParents(school.id);
+              // Get both parents and students data for each school
+              const [parentData, allStudentsData] = await Promise.all([
+                apiService.getSchoolParents(school.id),
+                apiService.getSchoolStudents(school.id)
+              ]);
+              
               const parentCount = Array.isArray(parentData) ? parentData.length : (parentData.parents?.length || 0);
-              stats[school.id] = { parentCount };
+              const studentCount = Array.isArray(allStudentsData) ? allStudentsData.length : (allStudentsData.students?.length || 0);
+              
+              stats[school.id] = { 
+                parentCount, 
+                studentCount 
+              };
             } catch (error) {
               console.error(`Failed to load stats for school ${school.id}:`, error);
-              stats[school.id] = { parentCount: 0 };
+              stats[school.id] = { 
+                parentCount: 0, 
+                studentCount: 0 
+              };
             }
           })
         );
@@ -613,6 +640,30 @@ const SchoolsManagement = () => {
     
     loadSchoolStats();
   }, [schools]);
+
+  // Load parent stats when parents are loaded
+  useEffect(() => {
+    const loadParentStats = async () => {
+      if (parents.length > 0 && selectedSchool) {
+        const stats = {};
+        await Promise.all(
+          parents.map(async (parent) => {
+            try {
+              const studentData = await apiService.getParentStudentsInSchool(selectedSchool.id, parent.id);
+              const studentCount = Array.isArray(studentData) ? studentData.length : (studentData.students?.length || 0);
+              stats[parent.id] = { studentCount };
+            } catch (error) {
+              console.error(`Failed to load stats for parent ${parent.id}:`, error);
+              stats[parent.id] = { studentCount: 0 };
+            }
+          })
+        );
+        setParentStats(stats);
+      }
+    };
+    
+    loadParentStats();
+  }, [parents, selectedSchool]);
 
   // Navigation path for breadcrumbs
   const getNavigationPath = () => {
@@ -626,7 +677,7 @@ const SchoolsManagement = () => {
       }
       
       if (selectedParent) {
-        path.push({ name: selectedParent.name, id: `parent-${selectedParent.id}` });
+        path.push({ name: selectedParent.name || selectedParent.displayName || `${selectedParent.firstName} ${selectedParent.lastName}`, id: `parent-${selectedParent.id}` });
         
         if (currentView === 'students') {
           path.push({ name: 'Students', id: `students-${selectedParent.id}` });
@@ -705,16 +756,18 @@ const SchoolsManagement = () => {
     setSelectedSchool(school);
     setSelectedParent(null);
     setCurrentView('parents');
+    setSearchTerm(''); // Clear search when navigating
     loadParents(school.id);
   };
 
   const handleParentSelect = (parent) => {
     setSelectedParent(parent);
     setCurrentView('students');
+    setSearchTerm(''); // Clear search when navigating
     loadStudents(selectedSchool.id, parent.id);
   };
 
-  // CRUD handlers
+  // Fixed CRUD handlers
   const handleSchoolSubmit = async (schoolData) => {
     try {
       setModalLoading(true);
@@ -735,39 +788,77 @@ const SchoolsManagement = () => {
     }
   };
 
-  const handleParentSubmit = async (parentData) => {
-    try {
-      setModalLoading(true);
-      
-      if (editingItem) {
-        await apiService.updateSchoolParent(selectedSchool.id, editingItem.id, parentData);
-      } else {
-        await apiService.createSchoolParent(selectedSchool.id, parentData);
-      }
-      
-      setShowParentModal(false);
-      setEditingItem(null);
-      await loadParents(selectedSchool.id);
-    } catch (err) {
-      setError('Failed to save parent: ' + err.message);
-    } finally {
-      setModalLoading(false);
+ const handleParentSubmit = async (parentData) => {
+  try {
+    setModalLoading(true);
+
+    // Convert camelCase -> snake_case to match backend expectation
+    const snakeCaseData = {
+      first_name: parentData.firstName,
+      last_name: parentData.lastName,
+      email: parentData.email,
+      phone: parentData.phone,
+      display_name: parentData.displayName || `${parentData.firstName} ${parentData.lastName}`.trim(),
+      school_id: selectedSchool.id, 
+    };
+
+    if (editingItem) {
+      await apiService.updateSchoolParent(selectedSchool.id, editingItem.id, snakeCaseData);
+    } else {
+      await apiService.createSchoolParent(selectedSchool.id, snakeCaseData);
     }
-  };
+
+    setShowParentModal(false);
+    setEditingItem(null);
+    await loadParents(selectedSchool.id);
+  } catch (err) {
+    setError('Failed to save parent: ' + err.message);
+  } finally {
+    setModalLoading(false);
+  }
+};
+
+
+
 
   const handleStudentSubmit = async (studentData) => {
     try {
       setModalLoading(true);
       
       if (editingItem) {
+        // For updates, we need to update the student and maintain parent relationship
         await apiService.updateSchoolStudent(selectedSchool.id, editingItem.id, studentData);
       } else {
-        await apiService.createSchoolStudent(selectedSchool.id, studentData);
+        // For creation, create student and link to parent
+        const createData = {
+          ...studentData,
+          schoolId: selectedSchool.id,
+          parentId: selectedParent.id // Link to current parent
+        };
+        await apiService.addStudentToParent(selectedSchool.id, selectedParent.id, createData);
       }
       
       setShowStudentModal(false);
       setEditingItem(null);
       await loadStudents(selectedSchool.id, selectedParent.id);
+      
+      // Refresh parent stats after student changes
+      if (selectedSchool && parents.length > 0) {
+        const stats = {};
+        await Promise.all(
+          parents.map(async (parent) => {
+            try {
+              const studentData = await apiService.getParentStudentsInSchool(selectedSchool.id, parent.id);
+              const studentCount = Array.isArray(studentData) ? studentData.length : (studentData.students?.length || 0);
+              stats[parent.id] = { studentCount };
+            } catch (error) {
+              console.error(`Failed to refresh stats for parent ${parent.id}:`, error);
+              stats[parent.id] = { studentCount: 0 };
+            }
+          })
+        );
+        setParentStats(stats);
+      }
     } catch (err) {
       setError('Failed to save student: ' + err.message);
     } finally {
@@ -791,8 +882,27 @@ const SchoolsManagement = () => {
           await loadParents(selectedSchool.id);
           break;
         case 'student':
-          await apiService.deleteSchoolStudent(selectedSchool.id, id);
+          // For students, we need to remove the relationship with the parent
+          await apiService.removeStudentFromParent(selectedParent.id, id);
           await loadStudents(selectedSchool.id, selectedParent.id);
+          
+          // Refresh parent stats after student deletion
+          if (selectedSchool && parents.length > 0) {
+            const stats = {};
+            await Promise.all(
+              parents.map(async (parent) => {
+                try {
+                  const studentData = await apiService.getParentStudentsInSchool(selectedSchool.id, parent.id);
+                  const studentCount = Array.isArray(studentData) ? studentData.length : (studentData.students?.length || 0);
+                  stats[parent.id] = { studentCount };
+                } catch (error) {
+                  console.error(`Failed to refresh stats for parent ${parent.id}:`, error);
+                  stats[parent.id] = { studentCount: 0 };
+                }
+              })
+            );
+            setParentStats(stats);
+          }
           break;
       }
     } catch (err) {
@@ -805,13 +915,25 @@ const SchoolsManagement = () => {
   // Filter data based on search
   const getFilteredData = (data) => {
     if (!searchTerm) return data;
-    return data.filter(item => 
-      item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.address?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return data.filter(item => {
+      const searchFields = [
+        item.name,
+        item.firstName,
+        item.lastName,
+        item.displayName,
+        item.email,
+        item.code,
+        item.phone,
+        item.address,
+        item.studentId,
+        item.student_id,
+        item.grade
+      ].filter(Boolean); // Remove null/undefined values
+      
+      return searchFields.some(field => 
+        field.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
   };
 
   // Error display component
@@ -849,7 +971,9 @@ const SchoolsManagement = () => {
             </div>
             <div>
               <div className="font-medium text-gray-900">{school.name}</div>
-              <div className="text-sm text-gray-500">{school.code}</div>
+              {school.code && (
+                <div className="text-sm text-gray-500">{school.code}</div>
+              )}
             </div>
           </div>
         )
@@ -862,7 +986,7 @@ const SchoolsManagement = () => {
             {school.email && (
               <div className="flex items-center text-sm text-gray-600">
                 <Mail className="w-3 h-3 mr-2" />
-                {school.email}
+                <span className="truncate max-w-xs">{school.email}</span>
               </div>
             )}
             {school.phone && (
@@ -880,7 +1004,7 @@ const SchoolsManagement = () => {
         render: (school) => school.address ? (
           <div className="flex items-center text-sm text-gray-600">
             <MapPin className="w-3 h-3 mr-2 flex-shrink-0" />
-            <span className="truncate">{school.address}</span>
+            <span className="truncate max-w-xs">{school.address}</span>
           </div>
         ) : (
           <span className="text-gray-400">Not specified</span>
@@ -889,29 +1013,32 @@ const SchoolsManagement = () => {
       {
         key: 'stats',
         header: 'Statistics',
-        render: (school) => (
-          <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-1 lg:space-y-0">
-            <div className="flex items-center text-sm text-gray-600">
-              <Users className="w-4 h-4 mr-1" />
-              {schoolStats[school.id]?.parentCount || 0} parent{(schoolStats[school.id]?.parentCount || 0) !== 1 ? 's' : ''}
+        render: (school) => {
+          const stats = schoolStats[school.id] || { parentCount: 0, studentCount: 0 };
+          return (
+            <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-1 lg:space-y-0">
+              <div className="flex items-center text-sm text-gray-600">
+                <Users className="w-4 h-4 mr-1" />
+                {stats.parentCount} parent{stats.parentCount !== 1 ? 's' : ''}
+              </div>
+              <div className="flex items-center text-sm text-gray-600">
+                <GraduationCap className="w-4 h-4 mr-1" />
+                {stats.studentCount} student{stats.studentCount !== 1 ? 's' : ''}
+              </div>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <GraduationCap className="w-4 h-4 mr-1" />
-              {school.student_count || 0} Students
-            </div>
-          </div>
-        )
+          );
+        }
       },
       {
         key: 'status',
         header: 'Status',
         render: (school) => (
           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-            school.is_active 
+            school.is_active !== false
               ? 'bg-green-100 text-green-800' 
               : 'bg-red-100 text-red-800'
           }`}>
-            {school.is_active ? 'Active' : 'Inactive'}
+            {school.is_active !== false ? 'Active' : 'Inactive'}
           </span>
         )
       }
@@ -944,14 +1071,27 @@ const SchoolsManagement = () => {
       />
     ];
 
+    // Calculate total stats for all schools
+    const totalStats = Object.values(schoolStats).reduce(
+      (acc, stats) => ({
+        parentCount: acc.parentCount + stats.parentCount,
+        studentCount: acc.studentCount + stats.studentCount
+      }),
+      { parentCount: 0, studentCount: 0 }
+    );
+
     return (
       <div className="space-y-6">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Schools Management</h1>
             <p className="text-gray-600 mt-1">Manage all schools in your system</p>
-            <div className="text-sm text-gray-500 mt-2">
-              {schools.length} school{schools.length !== 1 ? 's' : ''} total
+            <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
+              <span>{schools.length} school{schools.length !== 1 ? 's' : ''}</span>
+              <span>•</span>
+              <span>{totalStats.parentCount} total parent{totalStats.parentCount !== 1 ? 's' : ''}</span>
+              <span>•</span>
+              <span>{totalStats.studentCount} total student{totalStats.studentCount !== 1 ? 's' : ''}</span>
             </div>
           </div>
           <button
@@ -997,7 +1137,7 @@ const SchoolsManagement = () => {
     );
   };
 
-  // Parents List View
+  // Fixed Parents List View
   const ParentsListView = () => {
     const filteredParents = getFilteredData(parents);
 
@@ -1011,9 +1151,11 @@ const SchoolsManagement = () => {
               <User className="w-4 h-4 text-green-600" />
             </div>
             <div>
-              <div className="font-medium text-gray-900">{parent.name}</div>
-              {parent.occupation && (
-                <div className="text-sm text-gray-500">{parent.occupation}</div>
+              <div className="font-medium text-gray-900">
+                {parent.displayName || parent.name || `${parent.firstName || ''} ${parent.lastName || ''}`.trim()}
+              </div>
+              {parent.email && (
+                <div className="text-sm text-gray-500">{parent.email}</div>
               )}
             </div>
           </div>
@@ -1027,7 +1169,7 @@ const SchoolsManagement = () => {
             {parent.email && (
               <div className="flex items-center text-sm text-gray-600">
                 <Mail className="w-3 h-3 mr-2" />
-                <span className="truncate">{parent.email}</span>
+                <span className="truncate max-w-xs">{parent.email}</span>
               </div>
             )}
             {parent.phone && (
@@ -1040,26 +1182,17 @@ const SchoolsManagement = () => {
         )
       },
       {
-        key: 'address',
-        header: 'Address',
-        render: (parent) => parent.address ? (
-          <div className="flex items-center text-sm text-gray-600">
-            <MapPin className="w-3 h-3 mr-2 flex-shrink-0" />
-            <span className="truncate max-w-xs">{parent.address}</span>
-          </div>
-        ) : (
-          <span className="text-gray-400">Not specified</span>
-        )
-      },
-      {
         key: 'students',
         header: 'Students',
-        render: (parent) => (
-          <div className="flex items-center text-sm text-gray-600">
-            <GraduationCap className="w-4 h-4 mr-1" />
-            {parent.student_count || 0} students
-          </div>
-        )
+        render: (parent) => {
+          const stats = parentStats[parent.id] || { studentCount: 0 };
+          return (
+            <div className="flex items-center text-sm text-gray-600">
+              <GraduationCap className="w-4 h-4 mr-1" />
+              {stats.studentCount} student{stats.studentCount !== 1 ? 's' : ''}
+            </div>
+          );
+        }
       }
     ];
 
@@ -1090,6 +1223,12 @@ const SchoolsManagement = () => {
       />
     ];
 
+    // Calculate total students for all parents in this school
+    const totalStudents = Object.values(parentStats).reduce(
+      (acc, stats) => acc + stats.studentCount,
+      0
+    );
+
     return (
       <div className="space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
@@ -1099,6 +1238,7 @@ const SchoolsManagement = () => {
                 setCurrentView('schools');
                 setSelectedSchool(null);
                 setSelectedParent(null);
+                setSearchTerm('');
               }}
               className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
@@ -1107,8 +1247,10 @@ const SchoolsManagement = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Parents - {selectedSchool?.name}</h1>
               <p className="text-gray-600 mt-1">Manage parents for this school</p>
-              <div className="text-sm text-gray-500 mt-2">
-                {parents.length} parent{parents.length !== 1 ? 's' : ''} total
+              <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
+                <span>{parents.length} parent{parents.length !== 1 ? 's' : ''}</span>
+                <span>•</span>
+                <span>{totalStudents} total student{totalStudents !== 1 ? 's' : ''}</span>
               </div>
             </div>
           </div>
@@ -1155,7 +1297,7 @@ const SchoolsManagement = () => {
     );
   };
 
-  // Students List View
+  // Fixed Students List View
   const StudentsListView = () => {
     const filteredStudents = getFilteredData(students);
 
@@ -1169,9 +1311,11 @@ const SchoolsManagement = () => {
               <GraduationCap className="w-4 h-4 text-purple-600" />
             </div>
             <div>
-              <div className="font-medium text-gray-900">{student.name}</div>
-              {student.student_id && (
-                <div className="text-sm text-gray-500">ID: {student.student_id}</div>
+              <div className="font-medium text-gray-900">
+                {student.displayName || student.name || `${student.firstName || ''} ${student.lastName || ''}`.trim()}
+              </div>
+              {(student.studentId || student.student_id) && (
+                <div className="text-sm text-gray-500">ID: {student.studentId || student.student_id}</div>
               )}
             </div>
           </div>
@@ -1180,10 +1324,32 @@ const SchoolsManagement = () => {
       {
         key: 'grade',
         header: 'Grade',
-        render: (student) => (
+        render: (student) => student.grade ? (
           <span className="inline-flex px-2 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
             {student.grade}
           </span>
+        ) : (
+          <span className="text-gray-400">Not specified</span>
+        )
+      },
+      {
+        key: 'contact',
+        header: 'Contact',
+        render: (student) => (
+          <div className="space-y-1">
+            {student.email && (
+              <div className="flex items-center text-sm text-gray-600">
+                <Mail className="w-3 h-3 mr-2" />
+                <span className="truncate max-w-xs">{student.email}</span>
+              </div>
+            )}
+            {student.phone && (
+              <div className="flex items-center text-sm text-gray-600">
+                <Phone className="w-3 h-3 mr-2" />
+                {student.phone}
+              </div>
+            )}
+          </div>
         )
       },
       {
@@ -1191,32 +1357,13 @@ const SchoolsManagement = () => {
         header: 'Details',
         render: (student) => (
           <div className="space-y-1">
-            {student.age && (
-              <div className="text-sm text-gray-600">Age: {student.age}</div>
-            )}
-            {student.gender && (
-              <div className="text-sm text-gray-600">Gender: {student.gender}</div>
-            )}
-            {student.date_of_birth && (
+            {(student.dateOfBirth || student.date_of_birth) && (
               <div className="flex items-center text-sm text-gray-600">
                 <Calendar className="w-3 h-3 mr-1" />
-                {new Date(student.date_of_birth).toLocaleDateString()}
+                {new Date(student.dateOfBirth || student.date_of_birth).toLocaleDateString()}
               </div>
             )}
           </div>
-        )
-      },
-      {
-        key: 'medical',
-        header: 'Medical Info',
-        render: (student) => student.medical_info ? (
-          <div className="max-w-xs">
-            <div className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded truncate">
-              {student.medical_info}
-            </div>
-          </div>
-        ) : (
-          <span className="text-gray-400">None</span>
         )
       }
     ];
@@ -1249,13 +1396,16 @@ const SchoolsManagement = () => {
               onClick={() => {
                 setCurrentView('parents');
                 setSelectedParent(null);
+                setSearchTerm('');
               }}
               className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Students - {selectedParent?.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Students - {selectedParent?.displayName || selectedParent?.name || `${selectedParent?.firstName || ''} ${selectedParent?.lastName || ''}`.trim()}
+              </h1>
               <p className="text-gray-600 mt-1">Students connected to this parent in {selectedSchool?.name}</p>
               <div className="text-sm text-gray-500 mt-2">
                 {students.length} student{students.length !== 1 ? 's' : ''} total

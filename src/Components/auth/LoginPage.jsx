@@ -38,7 +38,7 @@ export const LoginPage = () => {
     return true;
   };
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     
@@ -55,20 +55,49 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center px-4 py-12">
+      {/* Gradient Background with Grid Pattern */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(135deg, #191069 0%, #010101 100%)',
+          backgroundImage: `
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }}
+      >
+        {/* Additional subtle grid accents */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
+            `,
+            backgroundSize: '120px 120px'
+          }}
+        ></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md w-full relative z-10">
         <div className="text-center mb-8">
           <div className="mb-6">
             <img 
-              src="/logo-portal.png" 
+              src="/smart_logo.png" 
               alt="Logo" 
-              className="mx-auto max-w-full h-auto max-h-16 sm:max-h-20 object-contain" 
+              className="mx-auto max-w-full h-auto max-h-16 sm:max-h-20 object-contain drop-shadow-lg" 
             />
           </div>
-          <p className="text-gray-600">Administrator Login Portal</p>
+          <h1 className="text-2xl font-medium mb-2 text-white drop-shadow-lg">
+            <span className="font-bold">Smart</span> School
+          </h1>
+          <p className="text-gray-200">Administrator Login Portal</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-2xl p-8 backdrop-blur-sm">
           <div className="space-y-6">
             {/* Email Field */}
             <div>
@@ -83,8 +112,9 @@ export const LoginPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 text-blue-700 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#191069] focus:border-transparent outline-none transition-all duration-200"
                   placeholder="Enter your email"
+                  style={{ color: '#191069' }}
                   required
                 />
               </div>
@@ -103,8 +133,9 @@ export const LoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 text-blue-700 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#191069] focus:border-transparent outline-none transition-all duration-200"
                   placeholder="Enter your password"
+                  style={{ color: '#191069' }}
                   required
                 />
                 <button
@@ -130,7 +161,11 @@ export const LoginPage = () => {
               type="submit"
               disabled={isLoading}
               onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-blue-300 disabled:to-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none shadow-lg hover:shadow-xl"
+              className="w-full font-medium py-3 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-[#191069] focus:ring-offset-2 outline-none shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                background: isLoading ? 'linear-gradient(135deg, #8b8bab 0%, #4a4a4a 100%)' : 'linear-gradient(135deg, #191069 60%, #010101 100%)',
+                color: 'white'
+              }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -151,7 +186,7 @@ export const LoginPage = () => {
         </div>
 
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-300">
             This is a secure administrative portal. All access is logged and monitored.
           </p>
         </div>
