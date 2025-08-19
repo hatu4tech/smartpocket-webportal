@@ -866,8 +866,6 @@ const SchoolsManagement = () => {
 };
 
 
-
-
   const handleStudentSubmit = async (studentData) => {
     try {
       setModalLoading(true);
