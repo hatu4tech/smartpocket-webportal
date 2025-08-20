@@ -199,7 +199,7 @@ const LinkManagement = () => {
       
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('Failed to unlink student: ' + err.message);
+      setError('Failed to unlink student: ' + err.message)
       console.error('Unlink student error:', err);
     }
   };
