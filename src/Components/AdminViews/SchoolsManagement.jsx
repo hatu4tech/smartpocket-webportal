@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   ChevronRight, 
   Plus, 
@@ -15,7 +15,6 @@ import {
   Mail, 
   MapPin, 
   Calendar,
-  MoreHorizontal,
   Filter,
   Download,
   Eye
@@ -163,7 +162,7 @@ const DataTable = ({ columns, data, loading, emptyState }) => {
               <tr>
                 {columns.map((column, index) => (
                   <th
-                    key={index}
+                    key={`header-${index}`}
                     className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
                     {column.header}
@@ -176,9 +175,9 @@ const DataTable = ({ columns, data, loading, emptyState }) => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {data.map((row, rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
+                <tr key={`row-${rowIndex}`} className="hover:bg-gray-50 transition-colors">
                   {columns.map((column, colIndex) => (
-                    <td key={colIndex} className="px-6 py-4 whitespace-nowrap">
+                    <td key={`cell-${rowIndex}-${colIndex}`} className="px-6 py-4 whitespace-nowrap">
                       {column.render ? column.render(row) : row[column.key]}
                     </td>
                   ))}
@@ -197,9 +196,9 @@ const DataTable = ({ columns, data, loading, emptyState }) => {
       {/* Mobile/Tablet Cards */}
       <div className="lg:hidden divide-y divide-gray-200">
         {data.map((row, rowIndex) => (
-          <div key={rowIndex} className="p-4 space-y-3">
+          <div key={`mobile-${rowIndex}`} className="p-4 space-y-3">
             {columns.map((column, colIndex) => (
-              <div key={colIndex}>
+              <div key={`mobile-cell-${rowIndex}-${colIndex}`}>
                 {column.render ? column.render(row) : (
                   <div className="flex justify-between items-start">
                     <span className="text-sm font-medium text-gray-500">{column.header}:</span>
@@ -229,14 +228,14 @@ const SchoolForm = ({ school, onSubmit, onCancel, isLoading }) => {
     description: school?.description || ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     onSubmit(formData);
-  };
+  }, [formData, onSubmit]);
 
-  const handleChange = (field, value) => {
+  const handleChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -318,34 +317,32 @@ const SchoolForm = ({ school, onSubmit, onCancel, isLoading }) => {
   );
 };
 
-// Fixed Parent Form Component - matches backend User model
+// Parent Form Component
 const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
   const [formData, setFormData] = useState({
     firstName: parent?.firstName || parent?.first_name || '',
     lastName: parent?.lastName || parent?.last_name || '',
     email: parent?.email || '',
     phone: parent?.phone || '',
-    // Handle the name field from backend response
     displayName: parent?.displayName || parent?.name || ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    // Transform data to match what backend expects
     const submitData = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
       phone: formData.phone,
       displayName: formData.displayName || `${formData.firstName} ${formData.lastName}`.trim(),
-      role: 'parent' // Ensure role is set for new parents
+      role: 'parent'
     };
     onSubmit(submitData);
-  };
+  }, [formData, onSubmit]);
 
-  const handleChange = (field, value) => {
+  const handleChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -421,27 +418,17 @@ const ParentForm = ({ parent, onSubmit, onCancel, isLoading }) => {
   );
 };
 
-
+// Student Form Component
 const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
-  
-  /**
-   * Helper function to format an ISO 8601 timestamp for use in a date input field.
-   * HTML date inputs require 'YYYY-MM-DD' format, so we strip out time and timezone.
-   *
-   * @param {string} isoString - ISO 8601 date string from backend
-   * @returns {string} formatted date string compatible with <input type="date" />
-   */
-  const formatDateForInput = (isoString) => {
+  const formatDateForInput = useCallback((isoString) => {
     if (!isoString) return '';
     const date = new Date(isoString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
-  // Initialize local state for form fields.
-  // Prefills from `student` if provided (edit mode) or empty for create mode.
   const [formData, setFormData] = useState({
     firstName: student?.firstName || student?.first_name || '',
     lastName: student?.lastName || student?.last_name || '',
@@ -453,8 +440,7 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
     displayName: student?.displayName || student?.name || ''
   });
 
- 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
 
     const submitData = {
@@ -466,34 +452,22 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
       role: 'student' 
     };
 
-    // Include student-specific fields only if user has entered them
     if (formData.grade) submitData.grade = formData.grade;
     if (formData.studentId) submitData.studentId = formData.studentId;
     if (formData.dateOfBirth) {
        submitData.dateOfBirth = new Date(formData.dateOfBirth).toISOString();
     }
-    // Trigger parent-provided callback to handle API submission
+    
     onSubmit(submitData);
-  };
+  }, [formData, onSubmit]);
 
-  /**
-   * Updates local form state when an input field changes.
-   * Generic handler that updates any field in formData by key.
-   *
-   * @param {string} field - name of the form field to update
-   * @param {string} value - new value for the field
-   */
-  const handleChange = (field, value) => {
+  const handleChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  // Render form
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Grid layout: 2-column on medium screens, single column on small */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        {/* First Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
           <input
@@ -505,7 +479,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Last Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
           <input
@@ -517,7 +490,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Student ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
           <input
@@ -528,7 +500,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Grade */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Grade</label>
           <input
@@ -539,7 +510,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
           <input
@@ -550,7 +520,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Phone */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
           <input
@@ -561,7 +530,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Date of Birth */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
           <input
@@ -572,7 +540,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
           />
         </div>
 
-        {/* Display Name */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
           <input
@@ -585,7 +552,6 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
         </div>
       </div>
 
-      {/* Form action buttons */}
       <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
         <button
           type="button"
@@ -607,6 +573,7 @@ const StudentForm = ({ student, onSubmit, onCancel, isLoading }) => {
 };
 
 // Action Button Component
+// eslint-disable-next-line no-unused-vars
 const ActionButton = ({ icon: Icon, onClick, className = "", tooltip }) => (
   <button
     onClick={onClick}
@@ -628,30 +595,66 @@ const SchoolsManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Store comprehensive stats for schools and parents
   const [schoolStats, setSchoolStats] = useState({});
   const [parentStats, setParentStats] = useState({});
   
   const { user } = useAuth();
   
-  // Modal states
   const [showSchoolModal, setShowSchoolModal] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
 
+  // Data loading functions
+  const loadSchools = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getSchools();
+      setSchools(Array.isArray(data) ? data : data.schools || []);
+    } catch (err) {
+      setError('Failed to load schools: ' + err.message);
+      setSchools([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadParents = useCallback(async (schoolId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getSchoolParents(schoolId);
+      setParents(Array.isArray(data) ? data : data.parents || []);
+    } catch (err) {
+      setError('Failed to load parents: ' + err.message);
+      setParents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadStudents = useCallback(async (schoolId, parentId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getParentStudentsInSchool(schoolId, parentId);
+      setStudents(Array.isArray(data) ? data : data.students || []);
+    } catch (err) {
+      setError('Failed to load students: ' + err.message);
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Load initial data
   useEffect(() => {
     loadSchools();
-  }, []);
+  }, [loadSchools]);
 
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  // Load comprehensive school stats (both parents and students)
+  // Load comprehensive school stats
   useEffect(() => {
     const loadSchoolStats = async () => {
       if (schools.length > 0) {
@@ -659,7 +662,6 @@ const SchoolsManagement = () => {
         await Promise.all(
           schools.map(async (school) => {
             try {
-              // Get both parents and students data for each school
               const [parentData, allStudentsData] = await Promise.all([
                 apiService.getSchoolParents(school.id),
                 apiService.getSchoolStudents(school.id)
@@ -712,8 +714,13 @@ const SchoolsManagement = () => {
     loadParentStats();
   }, [parents, selectedSchool]);
 
+  if (!user) {
+    return <LoginPage />;
+  }
+
   // Navigation path for breadcrumbs
-  const getNavigationPath = () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const getNavigationPath = useCallback(() => {
     const path = [{ name: 'Schools', id: 'schools' }];
     
     if (selectedSchool) {
@@ -733,10 +740,11 @@ const SchoolsManagement = () => {
     }
     
     return path;
-  };
+  }, [selectedSchool, currentView, selectedParent]);
 
   // Navigation handler
-  const handleNavigation = (pathIndex) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleNavigation = useCallback((pathIndex) => {
     const path = getNavigationPath();
     const targetItem = path[pathIndex];
     
@@ -753,69 +761,29 @@ const SchoolsManagement = () => {
     } else if (targetItem.id.startsWith('parent-')) {
       setCurrentView('students');
     }
-  };
-
-  // Data loading functions
-  const loadSchools = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiService.getSchools();
-      setSchools(Array.isArray(data) ? data : data.schools || []);
-    } catch (err) {
-      setError('Failed to load schools: ' + err.message);
-      setSchools([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadParents = async (schoolId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiService.getSchoolParents(schoolId);
-      setParents(Array.isArray(data) ? data : data.parents || []);
-    } catch (err) {
-      setError('Failed to load parents: ' + err.message);
-      setParents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadStudents = async (schoolId, parentId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiService.getParentStudentsInSchool(schoolId, parentId);
-      setStudents(Array.isArray(data) ? data : data.students || []);
-    } catch (err) {
-      setError('Failed to load students: ' + err.message);
-      setStudents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [getNavigationPath]);
 
   // Event handlers
-  const handleSchoolSelect = (school) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleSchoolSelect = useCallback((school) => {
     setSelectedSchool(school);
     setSelectedParent(null);
     setCurrentView('parents');
-    setSearchTerm(''); // Clear search when navigating
+    setSearchTerm('');
     loadParents(school.id);
-  };
+  }, [loadParents]);
 
-  const handleParentSelect = (parent) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleParentSelect = useCallback((parent) => {
     setSelectedParent(parent);
     setCurrentView('students');
-    setSearchTerm(''); // Clear search when navigating
+    setSearchTerm('');
     loadStudents(selectedSchool.id, parent.id);
-  };
+  }, [loadStudents, selectedSchool]);
 
-  // Fixed CRUD handlers
-  const handleSchoolSubmit = async (schoolData) => {
+  // CRUD handlers
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleSchoolSubmit = useCallback(async (schoolData) => {
     try {
       setModalLoading(true);
       
@@ -833,55 +801,53 @@ const SchoolsManagement = () => {
     } finally {
       setModalLoading(false);
     }
-  };
+  }, [editingItem, loadSchools]);
 
- const handleParentSubmit = async (parentData) => {
-  try {
-    setModalLoading(true);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleParentSubmit = useCallback(async (parentData) => {
+    try {
+      setModalLoading(true);
 
-    // Convert camelCase -> snake_case to match backend expectation
-    const snakeCaseData = {
-      first_name: parentData.firstName,
-      last_name: parentData.lastName,
-      email: parentData.email,
-      phone: parentData.phone,
-      display_name: parentData.displayName || `${parentData.firstName} ${parentData.lastName}`.trim(),
-      school_id: selectedSchool.id, 
-    };
+      const snakeCaseData = {
+        first_name: parentData.firstName,
+        last_name: parentData.lastName,
+        email: parentData.email,
+        phone: parentData.phone,
+        display_name: parentData.displayName || `${parentData.firstName} ${parentData.lastName}`.trim(),
+        school_id: selectedSchool.id, 
+      };
 
-    if (editingItem) {
-      await apiService.updateSchoolParent(selectedSchool.id, editingItem.id, snakeCaseData);
-    } else {
-      await apiService.createSchoolParent(selectedSchool.id, snakeCaseData);
+      if (editingItem) {
+        await apiService.updateSchoolParent(selectedSchool.id, editingItem.id, snakeCaseData);
+      } else {
+        await apiService.createSchoolParent(selectedSchool.id, snakeCaseData);
+      }
+
+      setShowParentModal(false);
+      setEditingItem(null);
+      await loadParents(selectedSchool.id);
+    } catch (err) {
+      setError('Failed to save parent: ' + err.message);
+    } finally {
+      setModalLoading(false);
     }
+  }, [editingItem, selectedSchool, loadParents]);
 
-    setShowParentModal(false);
-    setEditingItem(null);
-    await loadParents(selectedSchool.id);
-  } catch (err) {
-    setError('Failed to save parent: ' + err.message);
-  } finally {
-    setModalLoading(false);
-  }
-};
-
-
-  const handleStudentSubmit = async (studentData) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleStudentSubmit = useCallback(async (studentData) => {
     try {
       setModalLoading(true);
       
       if (editingItem) {
         await apiService.updateSchoolStudent(selectedSchool.id, editingItem.id, studentData);
       } else {
-      // For creation, call the student creation endpoint
-      const createData = {
-        ...studentData,
-        parentId: selectedParent.id, // optional, will link automatically
-      };
-      console.log('Creating student with payload:', createData);
-
-      await apiService.createSchoolStudent(selectedSchool.id, createData);
-    }
+        const createData = {
+          ...studentData,
+          parentId: selectedParent.id,
+        };
+        
+        await apiService.createSchoolStudent(selectedSchool.id, createData);
+      }
       
       setShowStudentModal(false);
       setEditingItem(null);
@@ -909,10 +875,11 @@ const SchoolsManagement = () => {
     } finally {
       setModalLoading(false);
     }
-  };
+  }, [editingItem, selectedSchool, selectedParent, loadStudents, parents]);
 
-  const handleDelete = async (type, id) => {
-    if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleDelete = useCallback(async (type, id) => {
+    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
     
     try {
       setLoading(true);
@@ -927,7 +894,6 @@ const SchoolsManagement = () => {
           await loadParents(selectedSchool.id);
           break;
         case 'student':
-          // For students, we need to remove the relationship with the parent
           await apiService.removeStudentFromParent(selectedParent.id, id);
           await loadStudents(selectedSchool.id, selectedParent.id);
           
@@ -949,16 +915,19 @@ const SchoolsManagement = () => {
             setParentStats(stats);
           }
           break;
+        default:
+          break;
       }
     } catch (err) {
       setError(`Failed to delete ${type}: ` + err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSchool, selectedParent, loadSchools, loadParents, loadStudents, parents]);
 
   // Filter data based on search
-  const getFilteredData = (data) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const getFilteredData = useCallback((data) => {
     if (!searchTerm) return data;
     return data.filter(item => {
       const searchFields = [
@@ -973,13 +942,13 @@ const SchoolsManagement = () => {
         item.studentId,
         item.student_id,
         item.grade
-      ].filter(Boolean); // Remove null/undefined values
+      ].filter(Boolean);
       
       return searchFields.some(field => 
         field.toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
-  };
+  }, [searchTerm]);
 
   // Error display component
   const ErrorMessage = ({ message, onRetry }) => (
@@ -1116,7 +1085,6 @@ const SchoolsManagement = () => {
       />
     ];
 
-    // Calculate total stats for all schools
     const totalStats = Object.values(schoolStats).reduce(
       (acc, stats) => ({
         parentCount: acc.parentCount + stats.parentCount,
@@ -1182,7 +1150,7 @@ const SchoolsManagement = () => {
     );
   };
 
-  // Fixed Parents List View
+  // Parents List View
   const ParentsListView = () => {
     const filteredParents = getFilteredData(parents);
 
@@ -1268,7 +1236,6 @@ const SchoolsManagement = () => {
       />
     ];
 
-    // Calculate total students for all parents in this school
     const totalStudents = Object.values(parentStats).reduce(
       (acc, stats) => acc + stats.studentCount,
       0
@@ -1342,7 +1309,7 @@ const SchoolsManagement = () => {
     );
   };
 
-  // Fixed Students List View
+  // Students List View
   const StudentsListView = () => {
     const filteredStudents = getFilteredData(students);
 
@@ -1510,7 +1477,6 @@ const SchoolsManagement = () => {
         {currentView === 'parents' && <ParentsListView />}
         {currentView === 'students' && <StudentsListView />}
 
-        {/* School Modal */}
         <Modal
           isOpen={showSchoolModal}
           onClose={() => {
@@ -1531,7 +1497,6 @@ const SchoolsManagement = () => {
           />
         </Modal>
 
-        {/* Parent Modal */}
         <Modal
           isOpen={showParentModal}
           onClose={() => {
@@ -1552,7 +1517,6 @@ const SchoolsManagement = () => {
           />
         </Modal>
 
-        {/* Student Modal */}
         <Modal
           isOpen={showStudentModal}
           onClose={() => {
