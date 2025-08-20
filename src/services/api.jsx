@@ -158,6 +158,14 @@ export const apiService = {
     });
   },
 
+// USE THIS METHOD FOR SCHOOL CONTEXT 
+// Alternative method with explicit school context (if needed)
+// async removeStudentFromParentInSchool(schoolId, parentId, studentId) {
+//   return this.request(`/schools/${schoolId}/parents/${parentId}/students/${studentId}`, {
+//     method: 'DELETE',
+//   });
+// },
+
   // Parent management for UI
   async getAllParents(filters = {}) {
     const queryParams = new URLSearchParams(filters).toString();

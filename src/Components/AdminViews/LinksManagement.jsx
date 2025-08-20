@@ -177,30 +177,20 @@ const LinkManagement = () => {
     }
 
     try {
-      // Use the correct API endpoint: DELETE /parents/:id/students/:student_id
-      try {
-        await apiService.removeStudentFromParent(selectedParent.id, studentId);
-      } catch (err) {
-        console.warn('API service method failed, trying direct fetch:', err);
-        
-        // Use direct fetch with the correct endpoint
-        const response = await fetch(`http://localhost:8080/api/v1/parents/${selectedParent.id}/students/${studentId}`, {
-          method: 'DELETE',
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`HTTP ${response.status}: ${errorData}`);
-        }
-      }
+      setError(''); // Clear any previous errors
+      
+      setSuccess(''); // Clear previous success messages
+      console.log('Unlinking student:', studentId, 'from parent:', selectedParent.id);
+      await apiService.removeStudentFromParent(selectedParent.id, studentId);
       
       setSuccess('Student unlinked successfully!');
       await loadParentStudents(selectedParent.id);
       
       setTimeout(() => setSuccess(''), 3000);
+      
     } catch (err) {
-      setError('Failed to unlink student: ' + err.message)
       console.error('Unlink student error:', err);
+      setError(`Failed to unlink student: ${err.message}`);
     }
   };
 
